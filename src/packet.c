@@ -12,31 +12,35 @@
 #include "packet.h"
 
 void process_packet(uint8_t *buf, ssize_t size) {
-    struct ip_header *ip_hdr = GET_IP_HEADER(buf);
+    struct ether_header *eth_hdr = (struct ether_header *) buf;
 
-    switch (ip_hdr->protocol) {
-        case IPPROTO_TCP:
-            printf("***********************TCP Packet*************************\n");
-            print_eth_header(buf);
-            print_ip_header(buf);
-            print_tcp_header(buf);
-            print_raw_data(buf, IPPROTO_TCP, size);
-            printf("##########################################################\n");
-            break;
-        case IPPROTO_UDP:
-            printf("***********************UDP Packet*************************\n");
-            print_eth_header(buf);
-            print_ip_header(buf);
-            print_udp_header(buf);
-            //if (GET_UDP_HEADER(buf)->src_port == 53 || GET_UDP_HEADER(buf)->dest_port == 53) {
-                print_dns_header(buf);
-                process_dns_packet(buf);
-            //} else {
-                print_raw_data(buf, IPPROTO_UDP, size);
-            //}*/
-            printf("##########################################################\n");
-        default:
-            break;
+    if (ntohs(eth_hdr->ether_type) == ETHERTYPE_IP) {
+        struct ip_header *ip_hdr = GET_IP_HEADER(buf);
+
+        switch (ip_hdr->protocol) {
+            case IPPROTO_TCP:
+                printf("***********************TCP Packet*************************\n");
+                print_eth_header(buf);
+                print_ip_header(buf);
+                print_tcp_header(buf);
+                print_raw_data(buf, IPPROTO_TCP, size);
+                printf("##########################################################\n");
+                break;
+            case IPPROTO_UDP:
+                printf("***********************UDP Packet*************************\n");
+                print_eth_header(buf);
+                print_ip_header(buf);
+                print_udp_header(buf);
+                //if (GET_UDP_HEADER(buf)->src_port == 53 || GET_UDP_HEADER(buf)->dest_port == 53) {
+                    print_dns_header(buf);
+                    process_dns_packet(buf);
+                //} else {
+                    print_raw_data(buf, IPPROTO_UDP, size);
+                //}*/
+                printf("##########################################################\n");
+            default:
+                break;
+        }
     }
 }
 
